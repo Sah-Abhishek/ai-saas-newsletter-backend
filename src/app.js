@@ -4,8 +4,6 @@ import express from "express";
 import { serve } from "inngest/express";
 
 import authRoutes from "./routes/authRoutes.js";
-import { onboardUser } from "./controllers/onBoardController.js";
-import { authMiddleware } from "./middleware/authMiddleware.js";
 import onBoardRoute from "./routes/onBoardRoute.js"
 import { inngest } from "./inggest.js";
 import { sendNewsletter } from "./functions/sendNewsletter.js";
@@ -42,8 +40,5 @@ console.log("📬 Registered Inngest Functions:");
 
 
 
-// You can easily scale this:
-/// app.use("/users", userRoutes);
-/// app.use("/projects", projectRoutes);
 
 export default app;

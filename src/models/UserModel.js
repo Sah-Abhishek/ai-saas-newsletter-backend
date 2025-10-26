@@ -1,10 +1,5 @@
-const mongoose = require('mongoose');
-
-// ====================================================================
-// Mock Bcrypt Implementation for Demo
-// (In production, use `const bcrypt = require('bcryptjs')`)
-// ============================
-const bcrypt = require('bcryptjs');
+import mongoose from "mongoose";
+import bcrypt from "bcryptjs";
 
 // ====================================================================
 // Define Base User Schema
@@ -52,4 +47,6 @@ userSchema.pre("save", async function (next) {
 // ====================================================================
 // Export Base Model
 // ====================================================================
-module.exports = mongoose.model("User", userSchema);
+const User = mongoose.model("User", userSchema);
+
+export default User;

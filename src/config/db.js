@@ -1,6 +1,5 @@
 
-const mongoose = require('mongoose');
-
+import mongoose from "mongoose";
 /**
  * @function connectDB
  * @description Establishes a connection to the MongoDB database using the URI 
@@ -25,4 +24,4 @@ const connectDB = async () => {
   }
 };
 
-module.exports = connectDB;
+export default connectDB;
