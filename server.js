@@ -6,6 +6,8 @@ import morgan from "morgan";
 
 import connectDB from "./src/config/db.js";
 import app from "./src/app.js"; // the app-level routes (with /auth etc.)
+app.use(cors());
+
 // import errorHandler from "./src/middlewares/errorHandler.js";
 
 dotenv.config();
