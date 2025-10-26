@@ -62,7 +62,7 @@ export const handleUserSignup = async (payload) => {
   let newUser;
 
   newUser = await Client.create({ name, email, password });
-  console.log("Tihs is the user email: ", email)
+  // console.log("Tihs is the user email: ", email)
   const token = generateToken(email);
 
 
@@ -88,7 +88,7 @@ export const handleLogin = async (payload) => {
   if (!isMatch) {
     throw new Error("Invalid Credentials")
   }
-  const token = generateToken(user);
+  const token = generateToken(email);
 
   return {
     token,
@@ -97,7 +97,8 @@ export const handleLogin = async (payload) => {
       name: user.name,
       email: user.email,
       role: user.role,
-      ...(user.role === "client" ? { subscribedTopics: user.subscribedTopics } : {}),
+      onboardingCompleted: user.onboardingCompleted,
+      ...(user.role === "Client" ? { subscribedTopics: user.subscribedTopics } : {}),
     },
   };
 }

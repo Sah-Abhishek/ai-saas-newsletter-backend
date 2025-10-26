@@ -1,3 +1,4 @@
+import { inngest } from "../inggest.js";
 import Client from "../models/ClientModel.js";
 // import mongoose from "mongoose";
 
@@ -47,6 +48,18 @@ export const onboardUser = async (req, res) => {
 
     await client.save();
 
+    await inngest.send({
+      name: "user.onboarded",
+      data: {
+        email: client.email,
+        topics: client.subscribedTopics,
+      },
+    });
+    console.log("🔔 Event sent:", {
+      name: "user.onboarded",
+      email: client.email,
+      topics: client.subscribedTopics,
+    });
     return res.status(200).json({
       message: "Onboarding completed successfully",
       user: {
