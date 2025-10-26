@@ -18,6 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 const inngestHandler = serve({
   client: inngest,
   functions: [sendNewsletter, generateNewsletter],
+  signingKey: process.env.INNGEST_SIGNING_KEY,
 });
 
 app.get("/inngest", inngestHandler);
