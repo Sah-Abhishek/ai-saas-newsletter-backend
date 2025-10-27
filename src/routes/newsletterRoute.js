@@ -8,5 +8,6 @@ import { authMiddleware } from "../middleware/authMiddleware.js";
 const router = express.Router();
 
 router.get("/", authMiddleware, getAllNewsletters);
+router.post("/reschedule", authMiddleware, getAllNewsletters);
 
 export default router;

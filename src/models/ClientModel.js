@@ -8,6 +8,11 @@ const clientSchema = new mongoose.Schema({
     type: [String],
     default: [],
   },
+  frequency: {
+    type: String,
+    enum: ["daily", "weekly", "biweekly"],
+    default: "weekly"
+  },
 
   // Where the user heard about your platform
   heardAboutUs: {

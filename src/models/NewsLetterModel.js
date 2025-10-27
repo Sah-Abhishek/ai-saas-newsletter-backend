@@ -8,6 +8,11 @@ const newsletterSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    heading: {
+      type: String,
+      required: true,
+      trim: true,
+    },
     topics: {
       type: [String],
       default: [],
