@@ -24,7 +24,7 @@ export const generateNewsletter = inngest.createFunction(
     const newsResponse = await axios.get(
       `https://newsapi.org/v2/everything?q=${encodeURIComponent(
         query
-      )}&from=2025-09-26&sortBy=publishedAt&apiKey=${NEWS_API_KEY}`
+      )}&sortBy=publishedAt&apiKey=${NEWS_API_KEY}`
     );
     const articles = newsResponse.data.articles || [];
 
