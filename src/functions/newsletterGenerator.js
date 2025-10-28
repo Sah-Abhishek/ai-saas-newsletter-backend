@@ -18,15 +18,12 @@ export const generateNewsletter = inngest.createFunction(
       }),
     },
   },
-  {
-    event: "user.onboarded"
-    // trigger: [
-    //   { event: "user.onboarded" },
-    //   { event: "newsletter.schedule.daily" },
-    //   { event: "newsletter.schedule.weekly" },
-    //   { event: "newsletter.schedule.biweekly" },
-    // ],
-  },
+  [
+    { event: "user.onboarded" },
+    { event: "newsletter.schedule.daily" },
+    { event: "newsletter.schedule.weekly" },
+    { event: "newsletter.schedule.biweekly" },
+  ],
 
   async ({ event, step }) => {
     const { email } = event.data;
@@ -51,50 +48,86 @@ export const generateNewsletter = inngest.createFunction(
       .map((a, idx) => `${idx + 1}. ${a.title} - ${a.description || ""}`)
       .join("\n\n");
 
-    // 3️⃣ Build Gemini prompt
-    const prompt = `
-Summarize the following news articles into a concise newsletter.
-Return ONLY valid JSON with two keys: "heading" and "summary".
-Do not include any extra text or explanation.
-The summary must include Markdown or HTML formatting (bold, headings, lists).
-The summary should be at least 1000 words or 5000 characters.
-\n\n${newsText}
-`;
+    // 3️⃣ Build Gemini prompt - STRICT JSON INSTRUCTION
+    const prompt = `You are a JSON API. You must respond with ONLY valid JSON, nothing else.
+
+Create a newsletter from these articles. Return your response in this EXACT JSON format:
+
+{
+  "heading": "your engaging newsletter title here",
+  "summary": "your comprehensive newsletter summary here with markdown formatting like ### headings, **bold text**, and bullet lists. Make this at least 1000 words covering the key stories about ${topics.join(", ")}."
+}
+
+CRITICAL: 
+- Output ONLY the JSON object
+- No markdown code blocks
+- No explanations before or after
+- Escape all special characters in strings
+- Use \\n for line breaks within the summary string
+
+News articles to summarize:
+${newsText}
+
+Remember: Output ONLY valid JSON, starting with { and ending with }`;
 
     // 4️⃣ Generate with Gemini
     const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
-    });
 
-    const rawText = response.text || "";
-    console.log("\x1b[44m%s\x1b[0m", "Gemini raw output:", rawText);
+    let heading = "AI Newsletter";
+    let summary = "No content available.";
+    let response;
 
-    // 5️⃣ Parse JSON safely
-    let parsed;
     try {
-      // Clean up if Gemini wraps JSON in markdown
-      const cleanText = rawText.replace(/```json|```/g, "").trim();
-      parsed = JSON.parse(cleanText);
+      response = await ai.models.generateContent({
+        model: "gemini-2.0-flash-exp",  // Changed to correct model name
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        generationConfig: {
+          temperature: 0.4,
+          topP: 0.8,
+          topK: 40,
+        }
+      });
+
+      let rawText = response.text || "{}";
+      console.log("\x1b[44m%s\x1b[0m", "Gemini raw output (first 300 chars):", rawText.substring(0, 300));
+
+      // Clean the response
+      rawText = rawText.trim();
+
+      // Remove markdown code blocks if present
+      rawText = rawText.replace(/```json\s*/gi, "").replace(/```\s*/g, "").trim();
+
+      // Extract JSON object if there's extra text
+      const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        rawText = jsonMatch[0];
+      }
+
+      const parsed = JSON.parse(rawText);
+      heading = parsed.heading?.trim() || "AI Newsletter";
+      summary = parsed.summary?.trim() || "No summary provided.";
+
+      console.log("✅ Successfully parsed JSON from Gemini");
+      console.log("📰 Heading:", heading);
+      console.log("📝 Summary length:", summary.length, "characters");
+
     } catch (err) {
-      console.error("❌ Failed to parse JSON from Gemini. Using fallback structure.", err);
-      parsed = {
-        heading: "AI Newsletter Update",
-        summary: rawText || "No summary available.",
-      };
+      console.error("❌ Error generating or parsing newsletter:", err);
+      if (response?.text) {
+        console.error("Raw response that failed:", response.text.substring(0, 500));
+      }
+
+      heading = "Your Weekly AI & Tech Newsletter";
+      summary = `# Newsletter Update\n\nWe're currently experiencing technical difficulties generating your personalized newsletter content. Our team is working on it!\n\n## Your Topics\nYou're subscribed to updates about: **${topics.join(", ")}**\n\nPlease check back soon for your curated content.`;
     }
 
-    const { heading, summary } = parsed;
-
     const markdownToHTML = marked(summary, { breaks: true }); // converts markdown → HTML
-
 
     // 6️⃣ Build newsletter HTML
     const newsletterHTML = `
   <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6; max-width: 600px; margin: auto; padding: 20px; background-color: #f9f9f9; border-radius: 8px;">
     <h1 style="color: #1e88e5;">${heading}</h1>
-    <p style="font-size: 16px;">Hi there 👋, here’s your curated newsletter based on your interests: <strong>${topics.join(", ")}</strong></p>
+    <p style="font-size: 16px;">Hi there 👋, here's your curated newsletter based on your interests: <strong>${topics.join(", ")}</strong></p>
 
     <div style="font-size: 15px;">
       ${markdownToHTML}
@@ -106,6 +139,7 @@ The summary should be at least 1000 words or 5000 characters.
     </p>
   </div>
 `;
+
     // 7️⃣ Send newsletter email
     const transporter = nodemailer.createTransport({
       service: "gmail",

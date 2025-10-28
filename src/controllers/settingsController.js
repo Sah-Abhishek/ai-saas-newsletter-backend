@@ -70,7 +70,7 @@ export const setNewsletterSchedule = async (req, res) => {
     // ✅ Update Client model
     const client = await Client.findOneAndUpdate(
       { email },
-      { newsletterFrequency: frequency.toLowerCase() },
+      { frequency: frequency.toLowerCase() },
       { new: true }
     );
 
