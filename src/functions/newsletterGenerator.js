@@ -1,4 +1,4 @@
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 import { marked } from "marked";
 import { parse } from 'jsonc-parser';
 
@@ -182,12 +182,18 @@ ${trackingPixel}
 
     // Step 2: Send the email (memoized — runs only once)
     await step.run("send-newsletter-email", async () => {
-      const resend = new Resend(process.env.RESEND_API_KEY);
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
+        },
+      });
 
       console.log('\x1b[44m\x1b[37m%s\x1b[0m', `📧 [SENDING EMAIL] To: ${email}`);
 
-      await resend.emails.send({
-        from: process.env.RESEND_FROM_EMAIL || "Newsletter <onboarding@resend.dev>",
+      await transporter.sendMail({
+        from: `"Your Updates Team" <${process.env.SMTP_USER}>`,
         to: email,
         subject: newsletterData.heading || "Your Personalized Newsletter",
         html: newsletterData.htmlContent,
