@@ -1,16 +1,14 @@
 // server.js
-import express from "express";
 import dotenv from "dotenv";
+dotenv.config();
+
+import express from "express";
 import cors from "cors";
 import morgan from "morgan";
 
 import connectDB from "./src/config/db.js";
 import app from "./src/app.js"; // the app-level routes (with /auth etc.)
 app.use(cors());
-
-// import errorHandler from "./src/middlewares/errorHandler.js";
-
-dotenv.config();
 
 // Connect to DB
 connectDB();

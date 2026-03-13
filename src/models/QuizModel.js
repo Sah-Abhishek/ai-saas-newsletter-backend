@@ -20,6 +20,10 @@ const QuestionSchema = new Schema(
       type: String,
       required: true,
     },
+    explanation: {
+      type: String,
+      default: "",
+    },
   },
 );
 

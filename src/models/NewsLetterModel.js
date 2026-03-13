@@ -23,7 +23,6 @@ const newsletterSchema = new mongoose.Schema(
     },
     htmlContent: {
       type: String,
-      required: true,
     },
     sentAt: {
       type: Date,
@@ -31,9 +30,14 @@ const newsletterSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["sent", "failed"],
+      enum: ["sent", "pending", "failed"],
       default: "sent",
     },
+    opened: {
+      type: Boolean,
+      default: false
+    }
+
   },
   { timestamps: true }
 );

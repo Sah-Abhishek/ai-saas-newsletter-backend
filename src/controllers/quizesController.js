@@ -132,6 +132,7 @@ export const submitQuiz = async (req, res) => {
         selected: userResponse.selectedAnswer,
         correctAnswer: q.correctAnswer,
         correct: isCorrect,
+        explanation: !isCorrect ? (q.explanation || "") : "",
       });
     });
 

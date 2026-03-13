@@ -6,11 +6,12 @@ import { serve } from "inngest/express";
 import authRoutes from "./routes/authRoutes.js";
 import onBoardRoute from "./routes/onBoardRoute.js"
 import { inngest } from "./inggest.js";
-import { sendNewsletter } from "./functions/sendNewsletter.js";
 import { generateNewsletter } from "./functions/newsletterGenerator.js";
 import newsletterRoute from "./routes/newsletterRoute.js";
 import quizRoutes from "./routes/quizRoutes.js";
 import settingsRoute from "./routes/settingsRoutes.js";
+import analyticsRoute from "./routes/analyticsRoute.js";
+import newsRoute from "./routes/newsRoute.js";
 import { generateQuiz } from "./functions/generateQuiz.js";
 import { dailyNewsletterTrigger } from "./functions/newsletterScheduleDaily.js";
 import { weeklyNewsletterTrigger } from "./functions/newsletterScheduleWeekly.js";
@@ -24,7 +25,6 @@ app.use(express.urlencoded({ extended: true }));
 const inngestHandler = serve({
   client: inngest,
   functions: [
-    sendNewsletter,
     generateNewsletter,
     generateQuiz,
     dailyNewsletterTrigger,
@@ -45,9 +45,11 @@ app.use("/onboard", onBoardRoute)
 app.use("/newsletter", newsletterRoute)
 app.use("/quiz", quizRoutes)
 app.use("/settings", settingsRoute)
+app.use("/analytics", analyticsRoute)
+app.use("/news", newsRoute)
 
 console.log("📬 Registered Inngest Functions:");
-[sendNewsletter].forEach((fn) => {
+[generateNewsletter].forEach((fn) => {
   const triggers =
     fn?.options?.triggers?.map((t) => t.event) ||
     fn?.config?.triggers?.map((t) => t.event) ||
