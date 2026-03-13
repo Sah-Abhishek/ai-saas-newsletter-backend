@@ -55,7 +55,7 @@ export const generateNewsletter = inngest.createFunction(
       }
 
       const topics = client.subscribedTopics || [];
-      const query = topics.length ? topics.join(" OR ") : "tesla";
+      const query = topics.length ? topics.join(" OR ") : "trending news";
 
       console.log('\x1b[45m\x1b[37m%s\x1b[0m', `📚 [TOPICS FETCHED] ${topics.join(", ")}`);
 
@@ -97,7 +97,7 @@ Remember: Output ONLY valid JSON, starting with { and ending with }`;
       // Generate with OpenAI
       const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-      let heading = "AI Newsletter";
+      let heading = "Your Newsletter";
       let summary = "No content available.";
 
       try {
@@ -126,7 +126,7 @@ Remember: Output ONLY valid JSON, starting with { and ending with }`;
       } catch (err) {
         console.error('\x1b[41m\x1b[37m%s\x1b[0m', `❌ [OPENAI ERROR]`, err);
 
-        heading = "Your Weekly AI & Tech Newsletter";
+        heading = "Your Weekly Newsletter";
         summary = `# Newsletter Update\n\nWe're currently experiencing technical difficulties generating your personalized newsletter content. Our team is working on it!\n\n## Your Topics\nYou're subscribed to updates about: **${topics.join(", ")}**\n\nPlease check back soon for your curated content.`;
       }
 

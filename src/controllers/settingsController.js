@@ -46,6 +46,108 @@ export const getNewsletterSchedule = async (req, res) => {
  * @route POST /api/settings/newsletterschedule
  * @access Private (requires auth middleware)
  */
+export const getSubscribedTopics = async (req, res) => {
+  try {
+    const email = req.userEmail;
+
+    if (!email) {
+      return res.status(401).json({
+        success: false,
+        message: "Email not found in the auth context",
+      });
+    }
+
+    const client = await Client.findOne({ email });
+    if (!client) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: {
+        subscribedTopics: client.subscribedTopics || [],
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching subscribed topics:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message,
+    });
+  }
+};
+
+export const setSubscribedTopics = async (req, res) => {
+  try {
+    const { topics } = req.body;
+    const { email } = req.user;
+
+    if (!email || !topics) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields: topics",
+      });
+    }
+
+    if (!Array.isArray(topics) || topics.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Topics must be a non-empty array.",
+      });
+    }
+
+    const validTopics = [
+      "Technology",
+      "Business",
+      "Science",
+      "Health",
+      "Entertainment",
+      "Sports",
+      "Politics",
+      "Environment",
+      "Education",
+      "Culture",
+    ];
+    const invalid = topics.filter((t) => !validTopics.includes(t));
+    if (invalid.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: `Invalid topics: ${invalid.join(", ")}`,
+      });
+    }
+
+    const client = await Client.findOneAndUpdate(
+      { email },
+      { subscribedTopics: topics },
+      { new: true }
+    );
+
+    if (!client) {
+      return res.status(404).json({
+        success: false,
+        message: "Client not found.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Subscribed topics updated successfully.",
+      data: { subscribedTopics: client.subscribedTopics },
+    });
+  } catch (err) {
+    console.error("Failed to update subscribed topics:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Server error while updating subscribed topics.",
+      error: err.message,
+    });
+  }
+};
+
 export const setNewsletterSchedule = async (req, res) => {
   try {
     const { frequency } = req.body;

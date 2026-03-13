@@ -10,7 +10,7 @@ export const getNews = async (req, res) => {
 
     const client = await Client.findOne({ email });
     const topics = client?.subscribedTopics || [];
-    const query = topics.length ? topics.join(" OR ") : "artificial intelligence";
+    const query = topics.length ? topics.join(" OR ") : "trending news";
 
     const NEWS_API_KEY = process.env.NEWS_API_KEY;
     const response = await axios.get(
