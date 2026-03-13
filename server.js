@@ -22,7 +22,18 @@ server.use(morgan("dev"));
 
 // ===== Health Check =====
 server.get("/", (req, res) => {
-  res.send(" API is running and healthy");
+  res.send("API is running and healthy");
+});
+
+server.get("/health", async (req, res) => {
+  const { default: mongoose } = await import("mongoose");
+  const dbStatus = mongoose.connection.readyState === 1 ? "connected" : "disconnected";
+  res.json({
+    status: "ok",
+    uptime: process.uptime(),
+    database: dbStatus,
+    timestamp: new Date().toISOString(),
+  });
 });
 
 // ===== All API Routes under /api =====
